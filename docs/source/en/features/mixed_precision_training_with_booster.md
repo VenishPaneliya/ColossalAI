@@ -167,9 +167,6 @@ We then need to initialize distributed environment. For demo purpose, we uses `l
 for other initialization methods.
 
 ```python
-# initialize distributed setting
-parser = colossalai.get_default_parser()
-args = parser.parse_args()
 
 # launch from torch
 colossalai.launch_from_torch()

@@ -10,13 +10,12 @@ Author: Chuanrui Wang, Shenggui Li, Siqi Mai
 ## Introduction
 
 As mentioned in the previous tutorials stated in the prerequisite, you need to initialize the distributed environment
-for Colossal-AI after your config file is prepared.
+for Colossal-AI.
 We call this process `launch`.
 In this tutorial, you will learn how to launch Colossal-AI on your server, be it a small one or big one.
 
 In Colossal-AI, we provided several launch methods to initialize the distributed backend.
-In most cases, you can use `colossalai.launch` and `colossalai.get_default_parser` to pass the
-parameters via command line.
+In most cases, you can use `colossalai.launch` and pass the parameters via the command line.
 If you happen to use launchers such as SLURM, OpenMPI and PyTorch launch utility,
 we also provide several launching helper methods to access the rank and world size from the environment variables
 set by these launchers directly for your convenience.
@@ -29,13 +28,8 @@ In this tutorial we will cover how to launch Colossal-AI to initialize the distr
 
 ## Launch Distributed Environment
 
-In order to launch Colossal-AI, we need two types of arguments:
-1. config file
-2. distributed settings
-
-The config file is always required regardless of the launch method but distributed settings can vary. The config file
-can be a path to the configuration file or a Python dictionary. The distributed settings can be passed via command line
-or multi-process launchers.
+To launch Colossal-AI, we need the distributed settings. They can be passed via the command line
+or read from the environment variables set by a multi-process launcher.
 
 ### Command Line Parser
 
@@ -49,15 +43,18 @@ the important parameters are:
 4. world_size
 5. backend
 
-In Colossal-AI, we provided a command line parser which has added these arguments in advance. You can get this parser by calling
-`colossalai.get_default_parser()`. This parser is usually used with `colossalai.launch`.
+Add these arguments to your own parser and pass them to `colossalai.launch`.
 
 ```python
 # add these lines in your train.py
-import colossalai
+import argparse
 
-# get default parser
-parser = colossalai.get_default_parser()
+parser = argparse.ArgumentParser()
+parser.add_argument("--host", type=str)
+parser.add_argument("--port", type=int)
+parser.add_argument("--rank", type=int)
+parser.add_argument("--world_size", type=int)
+parser.add_argument("--backend", type=str, default="nccl")
 
 # if you want to add your own arguments
 parser.add_argument(...)
@@ -77,14 +74,13 @@ python train.py --host <host> --rank <rank> --world_size <world_size> --port <po
 ### Native Launch
 
 To initialize the distributed environment, we provided a general `colossalai.launch` API. The `colossalai.launch` function takes in the parameters
-listed above and create a default process group in the communication network. This function is often used with the default
-parser for convenience.
+listed above and create a default process group in the communication network.
 
 ```python
 import colossalai
 
-# parse arguments
-args = colossalai.get_default_parser().parse_args()
+# parse arguments (see the parser above)
+args = parser.parse_args()
 
 # launch distributed environment
 colossalai.launch(rank=args.rank,

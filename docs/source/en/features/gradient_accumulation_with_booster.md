@@ -41,9 +41,6 @@ from colossalai.cluster.dist_coordinator import priority_execution
 We then need to initialize distributed environment. For demo purpose, we uses `launch_from_torch`. You can refer to [Launch Colossal-AI](../basics/launch_colossalai.md) for other initialization methods.
 
 ```python
-# initialize distributed setting
-parser = colossalai.get_default_parser()
-args = parser.parse_args()
 # launch from torch
 colossalai.launch_from_torch()
 ```

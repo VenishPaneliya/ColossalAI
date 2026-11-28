@@ -41,9 +41,6 @@ from colossalai.cluster.dist_coordinator import priority_execution
 我们需要初始化分布式环境。为了快速演示，我们使用`launch_from_torch`。你可以参考 [Launch Colossal-AI](../basics/launch_colossalai.md)使用其他初始化方法。
 
 ```python
-# initialize distributed setting
-parser = colossalai.get_default_parser()
-args = parser.parse_args()
 
 # launch from torch
 colossalai.launch_from_torch()

@@ -156,9 +156,6 @@ from colossalai.nn.lr_scheduler import LinearWarmupLR
 使用其他初始化方法。
 
 ```python
-# 初始化分布式设置
-parser = colossalai.get_default_parser()
-args = parser.parse_args()
 
 # launch from torch
 colossalai.launch_from_torch()

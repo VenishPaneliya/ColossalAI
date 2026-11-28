@@ -9,10 +9,10 @@
 
 ## 简介
 
-正如我们在前面的教程中所提到的，在您的配置文件准备好后，您需要为 Colossal-AI 初始化分布式环境。我们把这个过程称为 `launch`。在本教程中，您将学习如何在您的服务器上启动 Colossal-AI，不管是小型的还是大型的。
+正如我们在前面的教程中所提到的，您需要为 Colossal-AI 初始化分布式环境。我们把这个过程称为 `launch`。在本教程中，您将学习如何在您的服务器上启动 Colossal-AI，不管是小型的还是大型的。
 
 在 Colossal-AI 中，我们提供了几种启动方法来初始化分布式后端。
-在大多数情况下，您可以使用 `colossalai.launch` 和 `colossalai.get_default_parser` 来通过命令行传递参数。如果您想使用 SLURM、OpenMPI 和 PyTorch 等启动工具，我们也提供了几个启动的辅助方法以便您的使用。您可以直接从这些启动工具设置的环境变量中访问 rank 和 world size 大小。
+在大多数情况下，您可以使用 `colossalai.launch` 来通过命令行传递参数。如果您想使用 SLURM、OpenMPI 和 PyTorch 等启动工具，我们也提供了几个启动的辅助方法以便您的使用。您可以直接从这些启动工具设置的环境变量中访问 rank 和 world size 大小。
 
 在本教程中，我们将介绍如何启动 Colossal-AI 来初始化分布式后端：
 - 用 colossalai.launch 启动
@@ -22,11 +22,7 @@
 
 ## 启动分布式环境
 
-为了启动 Colossal-AI，我们需要两类参数:
-1. 配置文件
-2. 分布式设置
-
-无论我们使用何种启动方式，配置文件是必须要求的，而分布式设置有可能依情况而定。配置文件可以是配置文件的路径或 Python dictionary 的形式。分布式设置可以通过命令行或多进程启动器传递。
+为了启动 Colossal-AI，我们需要分布式设置。分布式设置可以通过命令行传递，也可以从多进程启动器设置的环境变量中读取。
 
 ### 命令行解析器
 
@@ -39,14 +35,18 @@
 4. world_size
 5. backend
 
-在 Colossal-AI 中，我们提供了一个命令行解析器，它已经提前添加了这些参数。您可以通过调用 `colossalai.get_default_parser()` 来获得这个解析器。这个解析器通常与 `colossalai.launch` 一起使用。
+请在您自己的解析器中添加这些参数，然后把它们传给 `colossalai.launch`。
 
 ```python
 # add these lines in your train.py
-import colossalai
+import argparse
 
-# get default parser
-parser = colossalai.get_default_parser()
+parser = argparse.ArgumentParser()
+parser.add_argument("--host", type=str)
+parser.add_argument("--port", type=int)
+parser.add_argument("--rank", type=int)
+parser.add_argument("--world_size", type=int)
+parser.add_argument("--backend", type=str, default="nccl")
 
 # if you want to add your own arguments
 parser.add_argument(...)
@@ -65,13 +65,13 @@ python train.py --host <host> --rank <rank> --world_size <world_size> --port <po
 
 ### 本地启动
 
-为了初始化分布式环境，我们提供了一个通用的 `colossalai.launch` API。`colossalai.launch` 函数接收上面列出的参数，并在通信网络中创建一个默认的进程组。方便起见，这个函数通常与默认解析器一起使用。
+为了初始化分布式环境，我们提供了一个通用的 `colossalai.launch` API。`colossalai.launch` 函数接收上面列出的参数，并在通信网络中创建一个默认的进程组。
 
 ```python
 import colossalai
 
-# parse arguments
-args = colossalai.get_default_parser().parse_args()
+# parse arguments (see the parser above)
+args = parser.parse_args()
 
 # launch distributed environment
 colossalai.launch(rank=args.rank,
